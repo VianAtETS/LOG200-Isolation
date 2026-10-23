@@ -3,16 +3,16 @@ import java.net.*;
 
 public class GameConnection implements Closeable {
 
-    public static final int GAME_INFO    = 0;
-    public static final int PLAY_RED     = 1;
-    public static final int PLAY_BLACK   = 2;
-    public static final int PLAY         = 3;
+    public static final int GAME_INFO = 0;
+    public static final int PLAY_RED = 1;
+    public static final int PLAY_BLACK = 2;
+    public static final int PLAY = 3;
     public static final int INVALID_MOVE = 4;
-    public static final int GAME_OVER    = 5;
+    public static final int GAME_OVER = 5;
 
     public static final int PROTOCOL_VERSION = 2;
 
-    public static final int RED   = 0;
+    public static final int RED = 0;
     public static final int BLACK = 1;
 
     private final Socket socket;
@@ -22,11 +22,9 @@ public class GameConnection implements Closeable {
     public GameConnection(String host, int port) throws IOException {
         socket = new Socket(host, port);
 
-        input = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
+        input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-        output = new BufferedWriter(
-                new OutputStreamWriter(socket.getOutputStream()));
+        output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
     }
 
     public GameInfo readGameInfo() throws IOException {
@@ -44,8 +42,7 @@ public class GameConnection implements Closeable {
 
         String[] values = message.getData().trim().split("\\s+");
 
-        if (values.length != 5)
-            throw new IOException("Invalid game information.");
+        if (values.length != 5) throw new IOException("Invalid game information.");
 
         try {
             int version = Integer.parseInt(values[0]);
@@ -53,12 +50,11 @@ public class GameConnection implements Closeable {
             if (version != PROTOCOL_VERSION)
                 throw new IOException("Unsupported protocol version: " + version);
 
-            int rows    = Integer.parseInt(values[1]);
-            int cols    = Integer.parseInt(values[2]);
-            int maxTime = Integer.parseInt(values[3]); 
-            int side    = Integer.parseInt(values[4]);
+            int rows = Integer.parseInt(values[1]);
+            int cols = Integer.parseInt(values[2]);
+            int maxTime = Integer.parseInt(values[3]);
+            int side = Integer.parseInt(values[4]);
 
-            
             return new GameInfo(version, rows, cols, maxTime, side);
 
         } catch (NumberFormatException e) {
@@ -69,8 +65,7 @@ public class GameConnection implements Closeable {
     public Message readMessage() throws IOException {
         String line = input.readLine();
 
-        if (line == null)
-            return null;
+        if (line == null) return null;
 
         int separator = line.indexOf(' ');
 
@@ -90,8 +85,7 @@ public class GameConnection implements Closeable {
             return new Message(command, data);
 
         } catch (NumberFormatException e) {
-            throw new IOException(
-                    "Invalid server message: " + line, e);
+            throw new IOException("Invalid server message: " + line, e);
         }
     }
 
@@ -151,11 +145,11 @@ public class GameConnection implements Closeable {
             return cols;
         }
 
-        public int getMaxMoveTime(){
+        public int getMaxMoveTime() {
             return maxMoveTime;
         }
 
-        public int getSide(){
+        public int getSide() {
             return side;
         }
     }
