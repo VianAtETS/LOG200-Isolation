@@ -5,6 +5,10 @@
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
+    "[java]": {
+        "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code"
+    },
+    "java.format.settings.google.extra": "--aosp",
     "[yaml]": {
         "editor.tabSize": 2
     },
@@ -13,5 +17,4 @@
             "file": ".copilot/commit-message-instructions.md"
         }
     ]
-
 }

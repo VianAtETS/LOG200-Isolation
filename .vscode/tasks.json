@@ -2,12 +2,49 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Compiler (javac)",
+            "type": "shell",
+            "command": "javac -d bin src/*.java",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Construire le jar",
+            "type": "shell",
+            "command": "mkdir -p dist && jar --create --file dist/Client-eqXXX.jar --main-class Client -C bin .",
+            "dependsOn": "Compiler (javac)",
+            "problemMatcher": []
+        },
+        {
+            "label": "Lancer le client (localhost:8888)",
+            "type": "shell",
+            "command": "java -cp bin Client localhost 8888",
+            "dependsOn": "Compiler (javac)",
+            "problemMatcher": []
+        },
+        {
+            "label": "Benchmark (contre les bots de l'arène)",
+            "type": "shell",
+            "command": "bash benchmark/run.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Formater (google-java-format)",
+            "type": "shell",
+            "command": "google-java-format --aosp --replace $(find src test benchmark -name '*.java')",
+            "problemMatcher": []
+        },
+        {
             "label": "Delete old Git branches",
             "type": "shell",
             "linux": {
                 "command": "git fetch --prune && git fetch -p ; git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}' | xargs --no-run-if-empty git branch -D"
             },
             "windows": {
+                "options": { "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] } },
                 "command": "git fetch --prune; git branch -vv | Select-String origin | ForEach-Object { $_.ToString().Trim() -replace '\\*', '' } | Where-Object { $_ -match '^\\s*(\\S+)\\s+\\w+\\s+\\[origin/([^\\]:]+).*: gone\\]' } | ForEach-Object { ($_ -split '\\s+')[0] } | ForEach-Object { git branch -D $_ }"
             },
             "problemMatcher": [],

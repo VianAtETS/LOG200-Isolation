@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Déboguer Client (serveur local)",
+            "request": "launch",
+            "mainClass": "Client",
+            "args": ["localhost", "8888"],
+            "sourcePaths": ["${workspaceFolder}/src"],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Déboguer le fichier courant",
+            "request": "launch",
+            "mainClass": "${file}"
+        }
+    ]
+}
