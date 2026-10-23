@@ -1,0 +1,75 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Publish release
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(bash .github/scripts/next-version.sh)"
+          if [[ -z "$VERSION" ]]; then
+            echo "::notice::Aucun commit feat/fix/perf/breaking depuis le dernier tag : pas de release."
+          else
+            echo "Prochaine version : $VERSION"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download jar and report
+        if: steps.version.outputs.version != ''
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Build submission archive
+        if: steps.version.outputs.version != ''
+        id: archive
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          JAR="$(ls dist/Client-eq*.jar)"
+          ZIP="LOG200-Isolation-${VERSION}.zip"
+          zip -j "$ZIP" "$JAR" src/*.java remise/LISEZMOI.md dist/rapport.pdf
+          unzip -l "$ZIP"
+          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          JAR: ${{ steps.archive.outputs.jar }}
+          ZIP: ${{ steps.archive.outputs.zip }}
+        run: |
+          gh release create "$VERSION" "$JAR" "$ZIP" \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --generate-notes

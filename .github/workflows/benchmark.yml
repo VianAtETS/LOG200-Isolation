@@ -1,0 +1,49 @@
+name: Benchmark
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+    inputs:
+      games:
+        description: Parties par match
+        default: '4'
+      time:
+        description: Temps par coup (ms)
+        default: '500'
+
+concurrency:
+  group: benchmark-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: Tournoi entre les branches
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Branche courante contre les bots de référence
+        # Le client de base attend la saisie clavier : on n'échoue pas le job pour autant
+        continue-on-error: true
+        run: bash benchmark/run.sh --games 4 --time 500
+
+      - name: Tournoi toutes-rondes entre les branches
+        env:
+          GAMES: ${{ inputs.games || '4' }}
+          TIME: ${{ inputs.time || '500' }}
+        run: bash benchmark/compare.sh
