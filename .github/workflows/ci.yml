@@ -12,7 +12,7 @@ on:
   workflow_call:
 
 env:
-  # Numéro d'équipe : la remise doit s'appeler Client-eqXXX.jar
+  # Numéro d'équipe : la remise doit s'appeler Client-eq200.jar
   TEAM: XXX
   JAVA_VERSION: '25'
   JUNIT_VERSION: 6.1.3

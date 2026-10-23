@@ -81,7 +81,7 @@ move.
 
 - **CI** (`.github/workflows/ci.yml`): on every pull request and push, checks
   the formatting (`google-java-format --aosp`), compiles `src/`, runs the JUnit
-  tests in `test/` (skipped if there are none), builds `Client-eqXXX.jar` and
+  tests in `test/` (skipped if there are none), builds `Client-eq200.jar` and
   plays 2 games against `random` in the arena (smoke test, non-blocking until
   the client plays on its own), then compiles the Typst report.
 - **Benchmark** (`.github/workflows/benchmark.yml`): on every push, plays the
@@ -90,7 +90,7 @@ move.
 - **Release** (`.github/workflows/release.yml`): on every push to `main`, runs
   the CI, then computes the next semantic version from the
   [Conventional Commits](https://www.conventionalcommits.org/) since the last
-  tag and publishes a GitHub release with `Client-eqXXX.jar` and a submission
+  tag and publishes a GitHub release with `Client-eq200.jar` and a submission
   zip (jar, `src/*.java`, `remise/LISEZMOI.md`, `rapport.pdf`):
   - `feat!:` or `BREAKING CHANGE:` → major, `feat:` → minor,
     `fix:`/`perf:` → patch;
@@ -101,7 +101,7 @@ move.
 
 Set the team number in `TEAM` (`.github/workflows/ci.yml`) and in the
 **Construire le jar** task (`.vscode/tasks.json`). The submission must run with
-`java -jar Client-eqXXX.jar`.
+`java -jar Client-eq200.jar`.
 
 ## 📁 Project Structure
 
