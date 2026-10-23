@@ -1,7 +1,20 @@
 {
-    "name": "LOG200 - Isolation (Java 24 + Typst)",
-    "build": {
-        "dockerfile": "Dockerfile"
+    "name": "LOG200 - Isolation (Java 25 + Typst + Wine)",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "dev",
+    "runServices": ["dev", "server"],
+    "workspaceFolder": "/workspaces/LOG200-Isolation",
+    "shutdownAction": "stopCompose",
+    "forwardPorts": [6080, 8888],
+    "portsAttributes": {
+        "6080": {
+            "label": "Serveur Isolation (GUI)",
+            "onAutoForward": "openPreview"
+        },
+        "8888": {
+            "label": "Serveur Isolation (jeu)",
+            "onAutoForward": "silent"
+        }
     },
     "customizations": {
         "vscode": {

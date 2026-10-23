@@ -1,0 +1,26 @@
+# Deux services démarrés ensemble par VS Code (« Reopen in Container ») :
+#   - server : serveur de jeu Windows (BoardGame.exe) sous Wine, GUI via noVNC (port 6080)
+#   - dev    : environnement Java/Typst dans lequel VS Code s'attache
+# dev partage la pile réseau de server : le client joint le serveur sur localhost:8888,
+# comme sous Windows.
+name: log200-isolation
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    volumes:
+      - ../server:/opt/boardgame
+    restart: unless-stopped
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspaces/LOG200-Isolation:cached
+    command: sleep infinity
+    network_mode: service:server
+    depends_on:
+      - server

@@ -1,5 +1,5 @@
-# JDK 21 (LTS) complet : java, javac et jdb (débogueur en ligne de commande)
-FROM mcr.microsoft.com/devcontainers/java:24-bookworm
+# JDK 25 (LTS) complet : java, javac et jdb (débogueur en ligne de commande)
+FROM mcr.microsoft.com/devcontainers/java:25-bookworm
 
 # Version épinglée de Typst (https://github.com/typst/typst/releases)
 ARG TYPST_VERSION=0.15.1
