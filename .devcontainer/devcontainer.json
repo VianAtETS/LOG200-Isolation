@@ -1,18 +1,46 @@
 {
-    "name": "Template Development Container",
-    "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+    "name": "LOG200 - Isolation (Java 24 + Typst)",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
     "customizations": {
-        "settings": {
-            "terminal.integrated.shell.linux": "/bin/bash"
-        },
         "vscode": {
             "extensions": [
-                "ms-vscode.atom-keybindings",
-                "ms-vscode-remote.remote-containers",
-                "ms-azuretools.vscode-docker",
-                "myriad-dreamin.tinymist"
-            ]
+                "vscjava.vscode-java-pack",
+                "redhat.java",
+                "josevseb.google-java-format-for-vs-code",
+                "vscjava.vscode-java-debug",
+                "myriad-dreamin.tinymist",
+                "streetsidesoftware.code-spell-checker",
+                "streetsidesoftware.code-spell-checker-french",
+                "EditorConfig.EditorConfig",
+                "ms-azuretools.vscode-docker"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "github.copilot.enable": { "*": false },
+                "github.copilot.nextEditSuggestions.enabled": false,
+                "editor.inlineSuggest.enabled": false,
+                "java.project.sourcePaths": ["src", "test"],
+                "java.project.referencedLibraries": ["/opt/junit/*.jar"],
+                "java.project.outputPath": "bin",
+                "[java]": {
+                    "editor.tabSize": 4,
+                    "editor.insertSpaces": true,
+                    "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code"
+                },
+                "java.format.settings.google.extra": "--aosp",
+                "java.format.settings.google.executable": "/usr/local/bin/google-java-format",
+                "tinymist.exportPdf": "onSave",
+                "tinymist.rootPath": "${workspaceFolder}",
+                "tinymist.formatterMode": "typstyle",
+                "[typst]": {
+                    "editor.defaultFormatter": "myriad-dreamin.tinymist"
+                }
+            }
         }
     },
+    "postCreateCommand": "java -version && javac -version && typst --version",
+    "postAttachCommand": "bash .devcontainer/install-extensions.sh",
     "remoteUser": "vscode"
 }
