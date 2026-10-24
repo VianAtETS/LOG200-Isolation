@@ -104,22 +104,6 @@ final class IsolationRules {
         return !destinations(pawn).isEmpty();
     }
 
-    // Cases destructibles autour du pion adverse selon la phase de jeu
-    List<Integer> targets(int opponentPawn) {
-        int center = position(opponentPawn);
-        if (destroyed >= 20) {
-            List<Integer> result = emptyCellsAt(center, 1);
-            result.addAll(emptyCellsAt(center, 2));
-            return result;
-        }
-        int[] distances = destroyed < 10 ? new int[] {3, 2, 1} : new int[] {2, 1};
-        for (int distance : distances) {
-            List<Integer> cellsAt = emptyCellsAt(center, distance);
-            if (!cellsAt.isEmpty()) return cellsAt;
-        }
-        return List.of();
-    }
-
     // Cases vides à exactement « distance » cases du centre, dans l'une des 8 directions
     private List<Integer> emptyCellsAt(int center, int distance) {
         int cx = center % cols;
@@ -135,25 +119,40 @@ final class IsolationRules {
         return result;
     }
 
+    // Distances de destruction de la phase, par ordre de priorité ; un groupe se joue entier
+    private int[][] distanceGroups() {
+        if (destroyed < 10) return new int[][] {{3}, {2}, {1}};
+        if (destroyed < 20) return new int[][] {{2}, {1}};
+        return new int[][] {{1, 2}};
+    }
+
+    // Le repli vers une distance plus courte est global, comme sur le serveur officiel : il n'a
+    // lieu que si AUCUNE destination ne permet de détruire à la distance courante. Une
+    // destination sans cible à cette distance n'est alors pas jouable du tout.
     List<Move> legalMoves(int pawn) {
         int from = position(pawn);
-        List<Move> moves = new ArrayList<>();
-        for (int to : destinations(pawn)) {
-            movePawn(from, to);
-            List<Integer> targets = targets(opponent(pawn));
-            if (targets.isEmpty()) moves.add(new Move(from, to, -1));
-            for (int target : targets) moves.add(new Move(from, to, target));
-            movePawn(to, from);
+        int center = position(opponent(pawn));
+        List<Integer> destinations = destinations(pawn);
+        for (int[] group : distanceGroups()) {
+            List<Move> moves = new ArrayList<>();
+            for (int to : destinations) {
+                movePawn(from, to);
+                for (int distance : group) {
+                    for (int target : emptyCellsAt(center, distance)) {
+                        moves.add(new Move(from, to, target));
+                    }
+                }
+                movePawn(to, from);
+            }
+            if (!moves.isEmpty()) return moves;
         }
+        List<Move> moves = new ArrayList<>();
+        for (int to : destinations) moves.add(new Move(from, to, -1));
         return moves;
     }
 
     boolean isLegal(Move move, int pawn) {
-        if (move.from() != position(pawn) || !destinations(pawn).contains(move.to())) return false;
-        movePawn(move.from(), move.to());
-        List<Integer> targets = targets(opponent(pawn));
-        movePawn(move.to(), move.from());
-        return move.target() == -1 ? targets.isEmpty() : targets.contains(move.target());
+        return legalMoves(pawn).contains(move);
     }
 
     // Joue un coup supposé légal
