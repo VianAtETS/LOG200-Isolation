@@ -75,6 +75,11 @@ jobs:
           mkdir -p dist
           jar --create --file "dist/Client-eq${TEAM}.jar" --main-class Client -C bin .
 
+      - name: Règles de l'arène
+        run: |
+          javac -encoding UTF-8 -d bin-arena benchmark/*.java
+          java -cp bin-arena IsolationRulesCheck
+
       - name: Smoke test (2 parties contre random dans l'arène)
         # Vérifie que le jar se connecte, joue des coups valides dans le temps imparti et
         # enchaîne plusieurs parties. À rendre bloquant (retirer continue-on-error) dès que
