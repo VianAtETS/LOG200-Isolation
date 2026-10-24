@@ -16,6 +16,8 @@ final class IsolationRulesCheck {
         moveWithoutDestructionIsIllegal();
         blockedPawnHasNoMoves();
         mobilePawnWithoutTargetHasNoMoves();
+        parserAcceptsServerSeparators();
+        parserRejectsMalformed();
 
         if (failures > 0) {
             System.out.println(failures + " vérification(s) en échec");
@@ -195,6 +197,44 @@ final class IsolationRulesCheck {
                         "B###........");
         check("rouge mobile", !game.destinations(IsolationRules.RED).isEmpty(), game);
         check("rouge sans cible : aucun coup", !game.hasMoves(IsolationRules.RED), game);
+    }
+
+    // Le serveur saute les espaces et les « - » en nombre quelconque et ignore la casse
+    private static void parserAcceptsServerSeparators() {
+        IsolationRules game = IsolationRules.initial(12, 12);
+        for (String text :
+                List.of(
+                        "G1-E3-C12",
+                        "G1E3C12",
+                        "G1 - E3 - C12",
+                        "g1 e3 c12",
+                        "  G1--E3 C12 ",
+                        "-G1-E3-C12-",
+                        "G01-E3-C12")) {
+            IsolationRules.Move m = game.parse(text);
+            check(
+                    "lecture de « " + text + " »",
+                    m != null && game.format(m).equals("G1 - E3 - C12"),
+                    m == null ? null : game.format(m));
+        }
+    }
+
+    private static void parserRejectsMalformed() {
+        IsolationRules game = IsolationRules.initial(12, 12);
+        for (String text :
+                List.of(
+                        "",
+                        "G1",
+                        "G1-E3-C12-D4",
+                        "G0-E3-C12",
+                        "G13-E3-C12",
+                        "M1-E3-C12",
+                        "G1;E3;C12",
+                        "G-E3-C12",
+                        "G1\tE3\tC12",
+                        "G99999999999-E3-C12")) {
+            check("refus de « " + text + " »", game.parse(text) == null, game.parse(text));
+        }
     }
 
     // Les distances (sur un rayon) entre le noir et les cibles des coups rouges valent exactement

@@ -28,12 +28,15 @@ final class IsolationRules {
     private static final int[][] DIRECTIONS = {
         {-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}
     };
+    // Comme le serveur officiel : espaces et « - » en nombre quelconque autour des cases, y
+    // compris aucun. 9 chiffres au plus pour que Integer.parseInt ne déborde pas.
     private static final Pattern MOVE =
             Pattern.compile(
-                    "([A-Za-z])(\\d{1,2})\\s*-?\\s*([A-Za-z])(\\d{1,2})"
-                            + "(?:\\s*-?\\s*([A-Za-z])(\\d{1,2}))?");
+                    "[ -]*([A-Za-z])(\\d{1,9})[ -]*([A-Za-z])(\\d{1,9})"
+                            + "(?:[ -]*([A-Za-z])(\\d{1,9}))?[ -]*");
 
-    // Coup : case de départ, case d'arrivée et case détruite (-1 si aucune)
+    // Coup : case de départ, case d'arrivée et case détruite (-1 si le texte n'en donne pas : un
+    // tel coup n'est jamais légal)
     record Move(int from, int to, int target) {}
 
     final int cols;
@@ -175,8 +178,8 @@ final class IsolationRules {
         return (char) ('A' + index % cols) + Integer.toString(rows - index / cols);
     }
 
-    // Accepte « G1-E3-C12 », « G1E3C12 » et « G1 - E3 - C12 » ; null si la syntaxe ou une case est
-    // invalide
+    // Accepte « G1-E3-C12 », « G1E3C12 », « G1 - E3 - C12 », « g1--e3 c12 »... ; null si la
+    // syntaxe ou une case est invalide
     Move parse(String text) {
         Matcher m = MOVE.matcher(text.trim());
         if (!m.matches()) return null;
