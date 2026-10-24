@@ -13,11 +13,14 @@ import java.util.regex.Pattern;
 //    F12, rouge de G1 ;
 //  - une cible « à exactement d cases » de l'adversaire est sur l'une des 8 directions (comme une
 //    dame aux échecs), pas sur l'anneau carré de rayon d ;
-//  - le serveur envoie les coups sous la forme « F12 - I9 - D4 ».
-//
-// Hypothèses non vérifiées (cas rares) : une case détruite entre l'adversaire et la cible ne la
-// masque pas ; la case de départ libérée peut être détruite ; sans aucune cible disponible, le
-// coup se joue sans destruction.
+//  - le serveur envoie les coups sous la forme « F12 - I9 - D4 » ;
+//  - le pion adverse bloque le déplacement comme une case détruite ;
+//  - une case détruite entre l'adversaire et la cible ne la masque pas ; la case de départ
+//    libérée peut être détruite, la case d'arrivée non ;
+//  - le repli vers une distance plus courte est global (voir legalMoves) ;
+//  - un coup comporte toujours une destruction : un pion qui peut bouger sans rien pouvoir
+//    détruire n'a aucun coup et perd. Il n'y a pas de partie nulle ;
+//  - un coup invalide reçoit « 4 » sans limite, le temps du tour continuant de s'écouler.
 final class IsolationRules {
     static final int EMPTY = 0;
     static final int DESTROYED = 1;
