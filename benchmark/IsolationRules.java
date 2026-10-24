@@ -100,8 +100,9 @@ final class IsolationRules {
         return result;
     }
 
+    // Un pion qui peut se déplacer mais n'a aucune case à détruire est bloqué : il a perdu
     boolean hasMoves(int pawn) {
-        return !destinations(pawn).isEmpty();
+        return !legalMoves(pawn).isEmpty();
     }
 
     // Cases vides à exactement « distance » cases du centre, dans l'une des 8 directions
@@ -146,9 +147,7 @@ final class IsolationRules {
             }
             if (!moves.isEmpty()) return moves;
         }
-        List<Move> moves = new ArrayList<>();
-        for (int to : destinations) moves.add(new Move(from, to, -1));
-        return moves;
+        return List.of();
     }
 
     boolean isLegal(Move move, int pawn) {
@@ -158,10 +157,8 @@ final class IsolationRules {
     // Joue un coup supposé légal
     void play(Move move) {
         movePawn(move.from(), move.to());
-        if (move.target() >= 0) {
-            cells[move.target()] = DESTROYED;
-            destroyed++;
-        }
+        cells[move.target()] = DESTROYED;
+        destroyed++;
     }
 
     private void movePawn(int from, int to) {
@@ -171,8 +168,7 @@ final class IsolationRules {
 
     // Format envoyé par le serveur officiel : « F12 - I9 - D4 »
     String format(Move move) {
-        String text = square(move.from()) + " - " + square(move.to());
-        return move.target() < 0 ? text : text + " - " + square(move.target());
+        return square(move.from()) + " - " + square(move.to()) + " - " + square(move.target());
     }
 
     String square(int index) {

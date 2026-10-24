@@ -88,8 +88,10 @@ final class Bots {
         for (IsolationRules.Move move : moves) {
             IsolationRules next = game.copy();
             next.play(move);
-            int theirs = next.destinations(opponent).size();
-            int score = theirs == 0 ? Integer.MAX_VALUE : next.destinations(me).size() - 2 * theirs;
+            int score =
+                    !next.hasMoves(opponent)
+                            ? Integer.MAX_VALUE
+                            : next.destinations(me).size() - 2 * next.destinations(opponent).size();
             if (score > bestScore) {
                 best = move;
                 bestScore = score;

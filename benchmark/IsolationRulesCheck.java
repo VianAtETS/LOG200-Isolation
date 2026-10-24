@@ -13,6 +13,9 @@ final class IsolationRulesCheck {
         originSquareIsDestroyableArrivalIsNot();
         middlePhaseUsesDistanceTwo();
         finalPhaseAllowsDistanceOneAndTwo();
+        moveWithoutDestructionIsIllegal();
+        blockedPawnHasNoMoves();
+        mobilePawnWithoutTargetHasNoMoves();
 
         if (failures > 0) {
             System.out.println(failures + " vérification(s) en échec");
@@ -141,6 +144,57 @@ final class IsolationRulesCheck {
                         "############",
                         "....####....");
         checkDistances("fin de partie", game, List.of(1, 2));
+    }
+
+    // Le serveur répond « 4 » à un coup sans case détruite
+    private static void moveWithoutDestructionIsIllegal() {
+        IsolationRules game = IsolationRules.initial(12, 12);
+        IsolationRules.Move move = game.parse("G1 - G3");
+        check("coup sans destruction lu", move != null, move);
+        check(
+                "coup sans destruction refusé",
+                move == null || !game.isLegal(move, IsolationRules.RED),
+                move);
+    }
+
+    private static void blockedPawnHasNoMoves() {
+        IsolationRules game =
+                diagram(
+                        "R#..........",
+                        "##..........",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "...........B");
+        check("pion bloqué", !game.hasMoves(IsolationRules.RED), game);
+        check("adversaire libre", game.hasMoves(IsolationRules.BLACK), game);
+    }
+
+    // Noir en A1, toutes les cases à 1, 2 et 3 sur ses rayons détruites : le rouge peut bouger
+    // mais n'a rien à détruire, il n'a donc aucun coup et perd
+    private static void mobilePawnWithoutTargetHasNoMoves() {
+        IsolationRules game =
+                diagram(
+                        "...........R",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "............",
+                        "#..#........",
+                        "#.#.........",
+                        "##..........",
+                        "B###........");
+        check("rouge mobile", !game.destinations(IsolationRules.RED).isEmpty(), game);
+        check("rouge sans cible : aucun coup", !game.hasMoves(IsolationRules.RED), game);
     }
 
     // Les distances (sur un rayon) entre le noir et les cibles des coups rouges valent exactement
