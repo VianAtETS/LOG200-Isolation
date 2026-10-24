@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 class Arena {
     private static final int SIZE = 12;
     private static final int PROTOCOL_VERSION = 2;
-    private static final int MAX_INVALID = 3;
     private static final int CONNECT_TIMEOUT_MS = 30_000;
     private static final String EOF = "\0EOF";
 
@@ -196,14 +195,17 @@ class Arena {
                 current.send("3 " + last);
             }
 
+            // Comme le serveur officiel : un coup invalide reçoit « 4 » autant de fois que
+            // nécessaire, mais le temps du tour continue de s'écouler
             IsolationRules.Move move = null;
-            int invalid = 0;
             String loss = null;
+            long start = System.nanoTime();
+            long deadline = start + TimeUnit.MILLISECONDS.toNanos(time + grace);
             while (move == null && loss == null) {
-                long start = System.nanoTime();
                 String line =
                         current.alive
-                                ? current.lines.poll(time + grace, TimeUnit.MILLISECONDS)
+                                ? current.lines.poll(
+                                        deadline - System.nanoTime(), TimeUnit.NANOSECONDS)
                                 : EOF;
                 long elapsed = System.nanoTime() - start;
                 if (line == null) {
@@ -221,8 +223,7 @@ class Arena {
                     } else {
                         current.invalid++;
                         System.out.println("  coup invalide de " + current.label + " : " + line);
-                        if (++invalid >= MAX_INVALID) loss = "LOSS";
-                        else current.send("4");
+                        current.send("4");
                     }
                 }
             }
